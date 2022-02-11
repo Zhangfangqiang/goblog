@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	"goblog/pkg/route"
 	"html/template"
 	"log"
 	"net/http"
@@ -15,8 +16,8 @@ import (
 	"unicode/utf8"
 )
 
-var db *sql.DB               //新建一个变量,变量的类型是 *sql.DB
-var router = mux.NewRouter() //路由
+var db *sql.DB         //新建一个变量,变量的类型是 *sql.DB
+var router *mux.Router //路由
 
 /**
  * 定义一个数据结构
@@ -151,7 +152,7 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		//4. 读取成功
 		tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{
-			"RouteName2URL": RouteName2URL,
+			"RouteName2URL": route.Name2URL,
 			"Int64ToString": Int64ToString,
 		}).ParseFiles("resources/views/articles/show.gohtml")
 
@@ -427,19 +428,6 @@ func getArticleByID(id string) (Article, error) {
 }
 
 /**
- * 返回url名称
- */
-func RouteName2URL(routeName string, pairs ...string) string {
-	url, err := router.Get(routeName).URL(pairs...)
-	if err != nil {
-		checkError(err)
-		return ""
-	}
-
-	return url.String()
-}
-
-/**
  * 帮助方法 字符串转换为int
  */
 func Int64ToString(num int64) string {
@@ -554,6 +542,10 @@ func validateArticleFormData(title string, body string) map[string]string {
 func main() {
 	initDB()
 	createTables()
+
+	route.Initialize()
+	router = route.Router
+
 	router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
 	router.HandleFunc("/about", aboutHandler).Methods("GET").Name("about")
 
