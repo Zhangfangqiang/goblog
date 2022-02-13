@@ -1,25 +1,28 @@
 package route
 
-import "github.com/gorilla/mux"
-
-var Router *mux.Router //定义一个路由变量
-
-/**
- * 初始化路由对象
- */
-func Initialize() {
-	Router = mux.NewRouter()
-}
+import (
+	"github.com/gorilla/mux"
+	"net/http"
+)
 
 /**
  * RouteName2URL 通过路由名称来获取 URL
  */
 func Name2URL(routeName string, pairs ...string) string {
-	url, err := Router.Get(routeName).URL(pairs...)
+	var route *mux.Router
+	url, err := route.Get(routeName).URL(pairs...)
 	if err != nil {
 		// checkError(err)
 		return ""
 	}
 
 	return url.String()
+}
+
+/**
+ * 获取路由参数的方法
+ */
+func GetRouteVariable(parameterName string, r *http.Request) string {
+	vars := mux.Vars(r)
+	return vars[parameterName]
 }
