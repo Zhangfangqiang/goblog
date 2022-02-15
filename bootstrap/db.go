@@ -1,7 +1,10 @@
 package bootstrap
 
 import (
+	"goblog/app/models/article"
+	"goblog/app/models/user"
 	"goblog/pkg/model"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -15,4 +18,16 @@ func SetupDB() {
 	sqlDB.SetMaxOpenConns(100)                //设置最大连接数
 	sqlDB.SetMaxIdleConns(25)                 //设置最大空闲连接数
 	sqlDB.SetConnMaxLifetime(5 * time.Minute) //设置每个链接的过期时间
+
+	migration(db) //自动迁移
+}
+
+/**
+ * 迁移开始
+ */
+func migration(db *gorm.DB) {
+	db.AutoMigrate(
+		&user.User{},
+		&article.Article{},
+	)
 }

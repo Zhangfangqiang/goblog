@@ -21,11 +21,11 @@ type ArticlesController struct{}
 /**
  * 定义一个结构
  */
-type ArticlesFormData struct {
-	Title, Body string
-	Article     article.Article
-	Errors      map[string]string
-}
+//type ArticlesFormData struct {
+//	Title, Body string
+//	Article     article.Article
+//	Errors      map[string]string
+//}
 
 /**
  * 验证方法
@@ -97,7 +97,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
  * 创建页
  */
 func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
-	view.Render(w, ArticlesFormData{}, "articles.create", "articles._form_field")
+	view.Render(w, view.D{}, "articles.create", "articles._form_field")
 }
 
 /**
@@ -125,11 +125,11 @@ func (*ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// 4. 读取成功，显示编辑文章表单
-		view.Render(w, ArticlesFormData{
-			Title:   _article.Title,
-			Body:    _article.Body,
-			Article: _article,
-			Errors:  nil,
+		view.Render(w, view.D{
+			"Title":   _article.Title,
+			"Body":    _article.Body,
+			"Article": _article,
+			"Errors":  nil,
 		}, "articles.edit", "articles._form_field")
 	}
 }
@@ -158,10 +158,10 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "创建文章失败，请联系管理员")
 		}
 	} else {
-		view.Render(w, ArticlesFormData{
-			Title:  title,
-			Body:   body,
-			Errors: errors,
+		view.Render(w, view.D{
+			"Title":  title,
+			"Body":   body,
+			"Errors": errors,
 		}, "articles.create", "articles._form_field")
 	}
 }
@@ -222,17 +222,19 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 		} else {
 
 			// 4.3 表单验证不通过，显示理由
-			view.Render(w, ArticlesFormData{
-				Title:   title,
-				Body:    body,
-				Article: _article,
-				Errors:  errors,
+			view.Render(w, view.D{
+				"Title":   title,
+				"Body":    body,
+				"Article": _article,
+				"Errors":  errors,
 			}, "articles.edit", "articles._form_field")
 		}
 	}
 }
 
-// Delete 删除文章
+/**
+ * Delete 删除文章
+ */
 func (*ArticlesController) Delete(w http.ResponseWriter, r *http.Request) {
 
 	// 1. 获取 URL 参数
