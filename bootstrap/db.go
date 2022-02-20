@@ -27,7 +27,7 @@ func SetupDB() {
  */
 func migration(db *gorm.DB) {
 	db.AutoMigrate(
-		&user.User{},
 		&article.Article{},
+		&user.User{},
 	)
 }
