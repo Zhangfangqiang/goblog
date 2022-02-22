@@ -16,7 +16,7 @@ import (
 //go:embed resources/views/layouts/*
 var tplFS embed.FS
 
-//go:embed public/*
+//go:embed resources/assets/*
 var staticFS embed.FS
 
 func init() {

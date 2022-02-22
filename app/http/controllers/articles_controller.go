@@ -6,6 +6,7 @@ import (
 	"goblog/app/policies"
 	"goblog/app/requests"
 	"goblog/pkg/auth"
+	"goblog/pkg/file"
 	"goblog/pkg/route"
 	"goblog/pkg/view"
 	"net/http"
@@ -16,7 +17,29 @@ type ArticlesController struct {
 	BaseController
 }
 
-// Show 文章详情页面
+/**
+ * 列表页
+ */
+func (ac *ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
+
+	// 1. 获取结果集
+	articles, pagerData, err := article.GetAll(r, 2)
+
+	if err != nil {
+		ac.ResponseForSQLError(w, err)
+	} else {
+
+		// ---  2. 加载模板 ---
+		view.Render(w, view.D{
+			"Articles":  articles,
+			"PagerData": pagerData,
+		}, "articles.index", "articles._article_meta")
+	}
+}
+
+/**
+ * 详情页
+ */
 func (ac *ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 
 	// 1. 获取 URL 参数
@@ -37,62 +60,16 @@ func (ac *ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Index 文章列表页
-func (ac *ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
-
-	// 1. 获取结果集
-	articles, pagerData, err := article.GetAll(r, 2)
-
-	if err != nil {
-		ac.ResponseForSQLError(w, err)
-	} else {
-
-		// ---  2. 加载模板 ---
-		view.Render(w, view.D{
-			"Articles":  articles,
-			"PagerData": pagerData,
-		}, "articles.index", "articles._article_meta")
-	}
-}
-
-// Create 文章创建页面
+/**
+ * 创建页
+ */
 func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
 	view.Render(w, view.D{}, "articles.create", "articles._form_field")
 }
 
-// Store 文章创建页面
-func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
-	// 1. 初始化数据
-	currentUser := auth.User()
-	_article := article.Article{
-		Title:  r.PostFormValue("title"),
-		Body:   r.PostFormValue("body"),
-		UserID: currentUser.ID,
-	}
-
-	// 2. 表单验证
-	errors := requests.ValidateArticleForm(_article)
-
-	// 3. 检测错误
-	if len(errors) == 0 {
-		// 创建文章
-		_article.Create()
-		if _article.ID > 0 {
-			indexURL := route.Name2URL("articles.show", "id", _article.GetStringID())
-			http.Redirect(w, r, indexURL, http.StatusFound)
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "创建文章失败，请联系管理员")
-		}
-	} else {
-		view.Render(w, view.D{
-			"Article": _article,
-			"Errors":  errors,
-		}, "articles.create", "articles._form_field")
-	}
-}
-
-// Edit 文章更新页面
+/**
+ * 编辑页
+ */
 func (ac *ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 
 	// 1. 获取 URL 参数
@@ -119,7 +96,47 @@ func (ac *ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Update 更新文章
+/**
+ * 创建api
+ */
+func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
+	// 1. 初始化数据
+	currentUser := auth.User()
+
+	saveFileNamePath := file.SaveFile("thumbnail", "img", r)
+
+	_article := article.Article{
+		Title:     r.PostFormValue("title"),
+		Body:      r.PostFormValue("body"),
+		Thumbnail: saveFileNamePath,
+		UserID:    currentUser.ID,
+	}
+
+	// 2. 表单验证
+	errors := requests.ValidateArticleForm(_article)
+
+	// 3. 检测错误
+	if len(errors) == 0 {
+		// 创建文章
+		_article.Create()
+		if _article.ID > 0 {
+			indexURL := route.Name2URL("articles.show", "id", _article.GetStringID())
+			http.Redirect(w, r, indexURL, http.StatusFound)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, "创建文章失败，请联系管理员")
+		}
+	} else {
+		view.Render(w, view.D{
+			"Article": _article,
+			"Errors":  errors,
+		}, "articles.create", "articles._form_field")
+	}
+}
+
+/**
+ * 更新api
+ */
 func (ac *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 
 	// 1. 获取 URL 参数
@@ -176,7 +193,9 @@ func (ac *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Delete 删除文章
+/**
+ * 删除api
+ */
 func (ac *ArticlesController) Delete(w http.ResponseWriter, r *http.Request) {
 
 	// 1. 获取 URL 参数

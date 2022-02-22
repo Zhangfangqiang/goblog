@@ -2,24 +2,20 @@ package bootstrap
 
 import (
 	"embed"
+	"github.com/gorilla/mux"
 	"goblog/pkg/route"
 	"goblog/routes"
-	"io/fs"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 // SetupRoute 路由初始化
 func SetupRoute(staticFS embed.FS) *mux.Router {
 	router := mux.NewRouter()
-	routes.RegisterWebRoutes(router)
-
-	route.SetRoute(router)
+	routes.RegisterWebRoutes(router) //注册路由
+	route.SetRoute(router)           //为了让router 全局统一
 
 	// 静态资源
-	sub, _ := fs.Sub(staticFS, "public")
-	router.PathPrefix("/").Handler(http.FileServer(http.FS(sub)))
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("resources/assets")))
 
 	return router
 }

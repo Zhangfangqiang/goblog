@@ -8,7 +8,7 @@
 
     <h3>新建文章</h3>
 
-    <form action="{{ RouteName2URL "articles.store" }}" method="post">
+    <form action="{{ RouteName2URL "articles.store" }}" method="post" enctype="multipart/form-data">
 
       {{template "form-fields" . }}
 
