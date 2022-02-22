@@ -2,16 +2,16 @@ package database
 
 import (
 	"database/sql"
-	"github.com/go-sql-driver/mysql"
 	"goblog/pkg/logger"
 	"time"
+
+	"github.com/go-sql-driver/mysql"
 )
 
+// DB 数据库对象
 var DB *sql.DB
 
-/**
- * 初始化方法
- */
+// Initialize 初始化数据库
 func Initialize() {
 	initDB()
 	createTables()
@@ -23,33 +23,30 @@ func initDB() {
 
 	// 设置数据库连接信息
 	config := mysql.Config{
-		User:                 "root",
-		Passwd:               "123456",
-		Addr:                 "127.0.0.1:3306",
+		User:                 "homestead",
+		Passwd:               "secret",
+		Addr:                 "127.0.0.1:2200",
 		Net:                  "tcp",
 		DBName:               "goblog",
 		AllowNativePasswords: true,
 	}
 
 	// 准备数据库连接池
-	db, err = sql.Open("mysql", config.FormatDSN())
+	DB, err = sql.Open("mysql", config.FormatDSN())
 	logger.LogError(err)
 
 	// 设置最大连接数
-	db.SetMaxOpenConns(100)
+	DB.SetMaxOpenConns(100)
 	// 设置最大空闲连接数
-	db.SetMaxIdleConns(25)
+	DB.SetMaxIdleConns(25)
 	// 设置每个链接的过期时间
-	db.SetConnMaxLifetime(5 * time.Minute)
+	DB.SetConnMaxLifetime(5 * time.Minute)
 
 	// 尝试连接，失败会报错
-	err = db.Ping()
+	err = DB.Ping()
 	logger.LogError(err)
 }
 
-/**
- * 创建表的方法
- */
 func createTables() {
 	createArticlesSQL := `CREATE TABLE IF NOT EXISTS articles(
     id bigint(20) PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -57,6 +54,6 @@ func createTables() {
     body longtext COLLATE utf8mb4_unicode_ci
 ); `
 
-	_, err := db.Exec(createArticlesSQL)
+	_, err := DB.Exec(createArticlesSQL)
 	logger.LogError(err)
 }

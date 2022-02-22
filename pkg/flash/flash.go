@@ -40,7 +40,7 @@ func Danger(message string) {
 // All 获取所有消息
 func All() Flashes {
 	val := session.Get(flashKey)
-	// 读取时必须做类型检测
+	// 读取是必须做类型检测
 	flashMessages, ok := val.(Flashes)
 	if !ok {
 		return nil

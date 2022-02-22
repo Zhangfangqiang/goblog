@@ -1,13 +1,12 @@
 package requests
 
 import (
-	"github.com/thedevsaddam/govalidator"
 	"goblog/app/models/user"
+
+	"github.com/thedevsaddam/govalidator"
 )
 
-/**
- * 用户注册验证开始
- */
+// ValidateRegistrationForm 验证表单，返回 errs 长度等于零即通过
 func ValidateRegistrationForm(data user.User) map[string][]string {
 
 	// 1. 定制认证规则

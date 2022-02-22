@@ -2,6 +2,8 @@ package user
 
 import (
 	"goblog/app/models"
+	"goblog/pkg/password"
+	"goblog/pkg/route"
 )
 
 // User 用户模型
@@ -16,13 +18,12 @@ type User struct {
 	PasswordConfirm string `gorm:"-" valid:"password_confirm"`
 }
 
-/**
- * ComparePassword 对比密码是否匹配
- */
-func (user *User) ComparePassword(password string) bool {
-	return user.Password == password
+// ComparePassword 对比密码是否匹配
+func (user *User) ComparePassword(_password string) bool {
+	return password.CheckHash(_password, user.Password)
 }
 
-func (user *User) Link() string {
-	return ""
+// Link 方法用来生成用户链接
+func (user User) Link() string {
+	return route.Name2URL("users.show", "id", user.GetStringID())
 }
